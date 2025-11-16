@@ -1,0 +1,32 @@
+{
+  "name": "community-services-platform",
+  "version": "1.0.0",
+  "description": "Community services platform for errands, elderly assistance, events, donations, and local services",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "mobile",
+    "shared"
+  ],
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install && cd ../mobile && npm install && cd ../shared && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "dev:mobile": "cd mobile && npm start",
+    "build:frontend": "cd frontend && npm run build",
+    "build:mobile": "cd mobile && npm run build",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces"
+  },
+  "keywords": [
+    "community",
+    "services",
+    "errands",
+    "elderly-care",
+    "local-services",
+    "time-credits"
+  ],
+  "author": "",
+  "license": "MIT"
+}
