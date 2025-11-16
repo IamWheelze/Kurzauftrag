@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Shop Manager</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="login-container" class="login-container">
+    <div class="login-box">
+      <h1>Admin Login</h1>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+        <div id="login-error" class="error-message"></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="admin-container" class="admin-container" style="display: none;">
+    <header class="admin-header">
+      <h1>Shop Admin Panel</h1>
+      <button id="logout-btn" class="btn btn-secondary">Logout</button>
+    </header>
+
+    <div class="admin-content">
+      <div class="upload-section">
+        <h2>Upload New Product</h2>
+        <form id="upload-form" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="title">Product Title *</label>
+            <input type="text" id="title" name="title" required placeholder="e.g., Nike Air Jordan 1">
+          </div>
+
+          <div class="form-group">
+            <label for="category">Category *</label>
+            <select id="category" name="category" required>
+              <option value="">Select Category</option>
+              <option value="shoes">Shoes</option>
+              <option value="bags">Bags</option>
+              <option value="accessories">Accessories</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="price">Price *</label>
+            <input type="number" id="price" name="price" step="0.01" required placeholder="0.00">
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4" placeholder="Product description..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="image">Product Image *</label>
+            <input type="file" id="image" name="image" accept="image/*" required>
+            <div id="image-preview" class="image-preview"></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Upload Product</button>
+          <div id="upload-message" class="message"></div>
+        </form>
+      </div>
+
+      <div class="products-section">
+        <h2>Manage Products</h2>
+        <div id="admin-products-grid" class="products-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
