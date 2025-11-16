@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - World Changers</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dashboard">
+  <div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div>
+        <h1>Welcome, <span id="user-name">Member</span></h1>
+        <p style="opacity: 0.9;">World Changers Mentorship Program</p>
+      </div>
+      <button onclick="logout()" style="background: rgba(255,255,255,0.2); color: var(--white); border: 2px solid var(--white); padding: 0.75rem 1.5rem; border-radius: 10px; cursor: pointer; font-weight: 600;">Logout</button>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="dashboard-grid">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <ul class="sidebar-nav">
+          <li><a href="#" class="active" onclick="showSection('goals')">🎯 My Goals</a></li>
+          <li><a href="#" onclick="showSection('progress')">📊 Progress Feed</a></li>
+          <li><a href="#" onclick="showSection('reports')">📝 Mentor Reports</a></li>
+          <li><a href="#" onclick="showSection('profile')">👤 Profile</a></li>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Goals Section -->
+        <div id="goals-section" class="content-section">
+          <h2 style="margin-bottom: 1.5rem;">Goal-Setting & Accountability Hub</h2>
+          <p style="color: var(--text-light); margin-bottom: 2rem;">Set your weekly goals and track your progress. Your goals are reviewed by Egbodofo Joshua weekly.</p>
+
+          <!-- Create Goal Form -->
+          <div style="background: var(--bg-light); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1.5rem; color: var(--primary-blue);">Set New Goal</h3>
+            <form id="goal-form">
+              <div class="form-group">
+                <label for="week_number">Week Number</label>
+                <input type="number" id="week_number" required min="1" max="52" placeholder="1-52">
+              </div>
+              <div class="form-group">
+                <label for="what_to_do">What will you do?</label>
+                <textarea id="what_to_do" required placeholder="Describe what you plan to accomplish..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="how_to_do">How will you do it?</label>
+                <textarea id="how_to_do" required placeholder="Outline your execution strategy..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="currently_working_on">What are you currently working on?</label>
+                <textarea id="currently_working_on" placeholder="Current projects or focus areas..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="target_date">Target Date</label>
+                <input type="date" id="target_date" required>
+              </div>
+              <button type="submit" class="btn-submit">Create Goal</button>
+            </form>
+          </div>
+
+          <!-- Goals List -->
+          <div>
+            <h3 style="margin-bottom: 1.5rem; color: var(--primary-blue);">My Goals</h3>
+            <div id="goals-list">
+              <div class="loading">Loading your goals...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Feed Section -->
+        <div id="progress-section" class="content-section" style="display: none;">
+          <h2 style="margin-bottom: 1.5rem;">Progress Feed</h2>
+          <p style="color: var(--text-light); margin-bottom: 2rem;">Share your progress, celebrate wins, and support fellow world changers.</p>
+
+          <!-- Create Post Form -->
+          <div style="background: var(--bg-light); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1.5rem; color: var(--primary-blue);">Share Your Progress</h3>
+            <form id="progress-form">
+              <div class="form-group">
+                <label for="post_content">What progress have you made?</label>
+                <textarea id="post_content" required placeholder="Share your achievements, learnings, or challenges..." style="min-height: 100px;"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="post_image">Add an Image (optional)</label>
+                <input type="file" id="post_image" accept="image/*">
+              </div>
+              <button type="submit" class="btn-submit">Post Update</button>
+            </form>
+          </div>
+
+          <!-- Progress Posts -->
+          <div>
+            <h3 style="margin-bottom: 1.5rem; color: var(--primary-blue);">Community Updates</h3>
+            <div id="progress-feed" class="progress-feed">
+              <div class="loading">Loading progress feed...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports-section" class="content-section" style="display: none;">
+          <h2 style="margin-bottom: 1.5rem;">Mentor Reports</h2>
+          <p style="color: var(--text-light); margin-bottom: 2rem;">Personal feedback and strategic guidance from Egbodofo Joshua.</p>
+          <div id="reports-list">
+            <div class="loading">Loading your reports...</div>
+          </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profile-section" class="content-section" style="display: none;">
+          <h2 style="margin-bottom: 1.5rem;">My Profile</h2>
+          <div style="background: var(--bg-light); padding: 2rem; border-radius: 15px;">
+            <div id="profile-info"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+
+    // Check authentication
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/members/status');
+        const data = await response.json();
+
+        if (!data.isLoggedIn) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        currentUser = data.user;
+        document.getElementById('user-name').textContent = currentUser.full_name;
+        loadGoals();
+        loadProfile();
+      } catch (error) {
+        window.location.href = 'login.html';
+      }
+    }
+
+    // Logout
+    async function logout() {
+      await fetch('/api/members/logout', { method: 'POST' });
+      window.location.href = 'index.html';
+    }
+
+    // Show section
+    function showSection(section) {
+      document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+      document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+
+      document.getElementById(`${section}-section`).style.display = 'block';
+      event.target.classList.add('active');
+
+      if (section === 'progress') loadProgressFeed();
+      if (section === 'reports') loadReports();
+    }
+
+    // Create goal
+    document.getElementById('goal-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = {
+        week_number: document.getElementById('week_number').value,
+        what_to_do: document.getElementById('what_to_do').value,
+        how_to_do: document.getElementById('how_to_do').value,
+        currently_working_on: document.getElementById('currently_working_on').value,
+        target_date: document.getElementById('target_date').value
+      };
+
+      try {
+        const response = await fetch('/api/goals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          this.reset();
+          loadGoals();
+          alert('Goal created successfully!');
+        }
+      } catch (error) {
+        alert('Error creating goal');
+      }
+    });
+
+    // Load goals
+    async function loadGoals() {
+      try {
+        const response = await fetch('/api/goals');
+        const goals = await response.json();
+
+        const container = document.getElementById('goals-list');
+
+        if (goals.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No goals yet. Create your first goal above!</p>';
+          return;
+        }
+
+        container.innerHTML = goals.map(goal => `
+          <div style="background: var(--white); border: 2px solid var(--border-light); border-radius: 15px; padding: 1.5rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+              <div>
+                <span style="background: var(--accent-gold); color: var(--primary-blue); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Week ${goal.week_number}</span>
+                <span style="margin-left: 1rem; color: var(--text-light); font-size: 0.9rem;">Due: ${new Date(goal.target_date).toLocaleDateString()}</span>
+              </div>
+              <span style="background: ${goal.status === 'active' ? 'var(--bg-gradient)' : '#10B981'}; color: var(--white); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">${goal.status}</span>
+            </div>
+            <h4 style="color: var(--primary-blue); margin-bottom: 0.75rem;">What to do:</h4>
+            <p style="color: var(--text-dark); margin-bottom: 1rem;">${goal.what_to_do}</p>
+            <h4 style="color: var(--primary-blue); margin-bottom: 0.75rem;">How:</h4>
+            <p style="color: var(--text-dark); margin-bottom: 1rem;">${goal.how_to_do}</p>
+            ${goal.currently_working_on ? `
+              <h4 style="color: var(--primary-blue); margin-bottom: 0.75rem;">Currently working on:</h4>
+              <p style="color: var(--text-dark);">${goal.currently_working_on}</p>
+            ` : ''}
+          </div>
+        `).join('');
+      } catch (error) {
+        document.getElementById('goals-list').innerHTML = '<p style="color: var(--text-light);">Error loading goals</p>';
+      }
+    }
+
+    // Create progress post
+    document.getElementById('progress-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append('content', document.getElementById('post_content').value);
+
+      const imageFile = document.getElementById('post_image').files[0];
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      try {
+        const response = await fetch('/api/progress', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          this.reset();
+          loadProgressFeed();
+          alert('Progress posted successfully!');
+        }
+      } catch (error) {
+        alert('Error posting progress');
+      }
+    });
+
+    // Load progress feed
+    async function loadProgressFeed() {
+      try {
+        const response = await fetch('/api/progress');
+        const posts = await response.json();
+
+        const container = document.getElementById('progress-feed');
+
+        if (posts.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No progress updates yet. Be the first to share!</p>';
+          return;
+        }
+
+        container.innerHTML = posts.map(post => {
+          const initials = post.full_name.split(' ').map(n => n[0]).join('');
+          return `
+            <div class="progress-post">
+              <div class="post-header">
+                <div class="post-avatar">${initials}</div>
+                <div class="post-author">
+                  <h4>${post.full_name}</h4>
+                  <p class="post-date">${new Date(post.created_at).toLocaleDateString()}</p>
+                </div>
+              </div>
+              <div class="post-content">${post.content}</div>
+              ${post.image_path ? `<img src="${post.image_path}" class="post-image" alt="Progress">` : ''}
+              <div class="post-actions">
+                <button class="vote-btn ${post.user_voted ? 'voted' : ''}" onclick="votePost(${post.id}, this)">
+                  ⭐ Value Added (${post.value_added_count})
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        document.getElementById('progress-feed').innerHTML = '<p style="color: var(--text-light);">Error loading progress feed</p>';
+      }
+    }
+
+    // Vote on post
+    async function votePost(postId, button) {
+      try {
+        const response = await fetch(`/api/progress/${postId}/vote`, { method: 'POST' });
+        if (response.ok) {
+          loadProgressFeed();
+        }
+      } catch (error) {
+        console.error('Error voting');
+      }
+    }
+
+    // Load reports
+    async function loadReports() {
+      try {
+        const response = await fetch('/api/reports');
+        const reports = await response.json();
+
+        const container = document.getElementById('reports-list');
+
+        if (reports.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No mentor reports yet. Egbodofo Joshua will provide personalized feedback weekly.</p>';
+          return;
+        }
+
+        container.innerHTML = reports.map(report => `
+          <div style="background: var(--white); border-left: 5px solid var(--accent-gold); border-radius: 15px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
+              <div>
+                <h4 style="color: var(--primary-blue); margin-bottom: 0.25rem;">Report from ${report.created_by}</h4>
+                <p style="color: var(--text-light); font-size: 0.9rem;">${new Date(report.created_at).toLocaleDateString()} • ${report.report_type}</p>
+              </div>
+            </div>
+            <div style="color: var(--text-dark); line-height: 1.8; white-space: pre-wrap;">${report.report_content}</div>
+          </div>
+        `).join('');
+      } catch (error) {
+        document.getElementById('reports-list').innerHTML = '<p style="color: var(--text-light);">Error loading reports</p>';
+      }
+    }
+
+    // Load profile
+    function loadProfile() {
+      if (!currentUser) return;
+
+      document.getElementById('profile-info').innerHTML = `
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <div style="width: 120px; height: 120px; border-radius: 50%; background: var(--bg-gradient); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 700; margin: 0 auto 1rem;">
+            ${currentUser.full_name.split(' ').map(n => n[0]).join('')}
+          </div>
+          <h3 style="color: var(--primary-blue); margin-bottom: 0.5rem;">${currentUser.full_name}</h3>
+          <p style="color: var(--text-light);">${currentUser.profession || 'World Changer'}</p>
+        </div>
+        <div style="display: grid; gap: 1rem;">
+          <div>
+            <h4 style="color: var(--primary-blue); margin-bottom: 0.5rem;">Email</h4>
+            <p style="color: var(--text-dark);">${currentUser.email}</p>
+          </div>
+          <div>
+            <h4 style="color: var(--primary-blue); margin-bottom: 0.5rem;">Member Since</h4>
+            <p style="color: var(--text-dark);">2024</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Initialize
+    checkAuth();
+  </script>
+</body>
+</html>

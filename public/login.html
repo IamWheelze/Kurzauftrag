@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Member Login - World Changers</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body style="background: var(--bg-light);">
+  <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+    <div class="form-container" style="max-width: 450px;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <a href="index.html" class="logo" style="font-size: 2rem; text-decoration: none;">
+          World <span class="logo-accent">Changers</span>
+        </a>
+        <p style="color: var(--text-light); margin-top: 0.5rem;">Member Login</p>
+      </div>
+
+      <div id="message-container"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="your@email.com">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="Enter your password">
+        </div>
+
+        <button type="submit" class="btn-submit" id="login-btn">Login</button>
+      </form>
+
+      <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-light);">
+        <p style="color: var(--text-dark);">
+          Not a member yet? <a href="apply.html" style="color: var(--accent-gold); text-decoration: none; font-weight: 600;">Apply Now</a>
+        </p>
+        <p style="color: var(--text-dark); margin-top: 1rem;">
+          <a href="index.html" style="color: var(--text-light); text-decoration: none;">← Back to Home</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const loginBtn = document.getElementById('login-btn');
+      const messageContainer = document.getElementById('message-container');
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Logging in...';
+
+      const formData = {
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value
+      };
+
+      try {
+        const response = await fetch('/api/members/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          messageContainer.innerHTML = '<div class="message success">Login successful! Redirecting...</div>';
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1000);
+        } else {
+          throw new Error(data.error || 'Login failed');
+        }
+      } catch (error) {
+        messageContainer.innerHTML = `<div class="message error">${error.message}</div>`;
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+      }
+    });
+  </script>
+</body>
+</html>

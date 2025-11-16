@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Testimonials - World Changers</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="main-nav">
+    <div class="nav-container">
+      <a href="index.html" class="logo">World <span class="logo-accent">Changers</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="curriculum.html">Curriculum</a></li>
+        <li><a href="testimonials.html" class="active">Testimonials</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="apply.html" class="cta-btn">Apply Now</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero" style="padding: 4rem 2rem;">
+    <div class="container" style="text-align: center; max-width: 900px;">
+      <h1 style="color: var(--white); margin-bottom: 1.5rem;">Success Stories</h1>
+      <p class="hero-subtitle">Hear from world changers who transformed their vision into reality through the mentorship program</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="testimonials-grid" id="testimonials-container">
+        <div class="loading">Loading testimonials...</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="background: var(--bg-gradient); color: var(--white); text-align: center;">
+    <div class="container">
+      <h2 style="color: var(--white); margin-bottom: 1.5rem;">Write Your Own Success Story</h2>
+      <p style="font-size: 1.25rem; margin-bottom: 2.5rem; opacity: 0.9;">Join the community of world changers and start your transformation today.</p>
+      <a href="apply.html" class="btn-primary" style="font-size: 1.25rem; padding: 1.25rem 3rem;">Apply for the Program</a>
+    </div>
+  </section>
+
+  <footer class="main-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>World Changers</h3>
+        <p>Transforming intentional individuals into global impact strategists.</p>
+      </div>
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <p><a href="index.html">Home</a></p>
+        <p><a href="about.html">About</a></p>
+        <p><a href="apply.html">Apply</a></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 World Changers Mentorship Program. Founded by Egbodofo Joshua.</p>
+    </div>
+  </footer>
+
+  <script>
+    async function loadTestimonials() {
+      try {
+        const response = await fetch('/api/testimonials');
+        const testimonials = await response.json();
+
+        const container = document.getElementById('testimonials-container');
+
+        if (testimonials.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--text-light);">Testimonials will be added soon.</p>';
+          return;
+        }
+
+        container.innerHTML = testimonials.map(t => `
+          <div class="testimonial-card">
+            <div class="testimonial-content">${t.content}</div>
+            <div class="testimonial-author">
+              ${t.image_path ? `<img src="${t.image_path}" alt="${t.name}" class="author-image">` : ''}
+              <div class="author-info">
+                <h4>${t.name}</h4>
+                ${t.role ? `<p>${t.role}</p>` : ''}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        document.getElementById('testimonials-container').innerHTML = '<p style="text-align: center; color: var(--text-light);">Testimonials will be added soon.</p>';
+      }
+    }
+
+    loadTestimonials();
+  </script>
+</body>
+</html>

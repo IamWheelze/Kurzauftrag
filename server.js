@@ -62,22 +62,23 @@ app.use(session({
 }));
 
 // Authentication middleware
-const isAuthenticated = (req, res, next) => {
+const isAdmin = (req, res, next) => {
   if (req.session.isAdmin) {
     next();
   } else {
-    res.status(401).json({ error: 'Unauthorized' });
+    res.status(401).json({ error: 'Unauthorized - Admin access required' });
   }
 };
 
-// Get client IP address
-const getClientIp = (req) => {
-  return req.headers['x-forwarded-for']?.split(',')[0] ||
-         req.connection.remoteAddress ||
-         req.socket.remoteAddress;
+const isMember = (req, res, next) => {
+  if (req.session.userId) {
+    next();
+  } else {
+    res.status(401).json({ error: 'Unauthorized - Member access required' });
+  }
 };
 
-// ==================== ROUTES ====================
+// ==================== ADMIN ROUTES ====================
 
 // Admin login
 app.post('/api/admin/login', async (req, res) => {
@@ -88,7 +89,7 @@ app.post('/api/admin/login', async (req, res) => {
 
   if (username === adminUsername && password === adminPassword) {
     req.session.isAdmin = true;
-    res.json({ success: true, message: 'Logged in successfully' });
+    res.json({ success: true, message: 'Admin logged in successfully' });
   } else {
     res.status(401).json({ error: 'Invalid credentials' });
   }
@@ -105,18 +106,9 @@ app.get('/api/admin/status', (req, res) => {
   res.json({ isAdmin: !!req.session.isAdmin });
 });
 
-// Get all products (public)
-app.get('/api/products', (req, res) => {
-  const clientIp = getClientIp(req);
-
-  db.all(`
-    SELECT
-      p.*,
-      CASE WHEN l.ip_address IS NOT NULL THEN 1 ELSE 0 END as user_liked
-    FROM products p
-    LEFT JOIN likes l ON p.id = l.product_id AND l.ip_address = ?
-    ORDER BY p.created_at DESC
-  `, [clientIp], (err, rows) => {
+// Get all users (admin only)
+app.get('/api/admin/users', isAdmin, (req, res) => {
+  db.all('SELECT * FROM users ORDER BY joined_date DESC', [], (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
@@ -125,94 +117,299 @@ app.get('/api/products', (req, res) => {
   });
 });
 
-// Get single product
-app.get('/api/products/:id', (req, res) => {
-  const clientIp = getClientIp(req);
-
-  db.get(`
-    SELECT
-      p.*,
-      CASE WHEN l.ip_address IS NOT NULL THEN 1 ELSE 0 END as user_liked
-    FROM products p
-    LEFT JOIN likes l ON p.id = l.product_id AND l.ip_address = ?
-    WHERE p.id = ?
-  `, [clientIp, req.params.id], (err, row) => {
+// Get all applications (admin only)
+app.get('/api/admin/applications', isAdmin, (req, res) => {
+  db.all('SELECT * FROM applications ORDER BY submitted_at DESC', [], (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    if (!row) {
-      res.status(404).json({ error: 'Product not found' });
-      return;
-    }
-    res.json(row);
+    res.json(rows);
   });
 });
 
-// Create product (admin only)
-app.post('/api/products', isAuthenticated, upload.single('image'), (req, res) => {
-  const { title, description, category, price } = req.body;
+// Approve application (admin only)
+app.post('/api/admin/applications/:id/approve', isAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
 
-  if (!req.file) {
-    return res.status(400).json({ error: 'Image is required' });
-  }
+  // Get application
+  db.get('SELECT * FROM applications WHERE id = ?', [id], async (err, app) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
 
-  const imagePath = `/uploads/${req.file.filename}`;
+    if (!app) {
+      res.status(404).json({ error: 'Application not found' });
+      return;
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user account
+    db.run(
+      'INSERT INTO users (full_name, email, password, phone, profession) VALUES (?, ?, ?, ?, ?)',
+      [app.full_name, app.email, hashedPassword, app.phone, app.profession],
+      function(err) {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+
+        // Update application status
+        db.run('UPDATE applications SET status = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ?',
+          ['approved', id],
+          (err) => {
+            if (err) {
+              res.status(500).json({ error: err.message });
+              return;
+            }
+            res.json({ success: true, message: 'Application approved and user created' });
+          }
+        );
+      }
+    );
+  });
+});
+
+// Get user goals (admin only)
+app.get('/api/admin/users/:userId/goals', isAdmin, (req, res) => {
+  db.all('SELECT * FROM goals WHERE user_id = ? ORDER BY created_at DESC',
+    [req.params.userId],
+    (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json(rows);
+    }
+  );
+});
+
+// Create mentor report (admin only)
+app.post('/api/admin/reports', isAdmin, (req, res) => {
+  const { user_id, report_content, report_type } = req.body;
 
   db.run(
-    'INSERT INTO products (title, description, category, price, image_path) VALUES (?, ?, ?, ?, ?)',
-    [title, description, category, price, imagePath],
+    'INSERT INTO mentor_reports (user_id, report_content, report_type) VALUES (?, ?, ?)',
+    [user_id, report_content, report_type || 'weekly'],
     function(err) {
       if (err) {
         res.status(500).json({ error: err.message });
         return;
       }
-      res.json({
-        success: true,
-        productId: this.lastID,
-        message: 'Product created successfully'
-      });
+      res.json({ success: true, reportId: this.lastID });
     }
   );
 });
 
-// Delete product (admin only)
-app.delete('/api/products/:id', isAuthenticated, (req, res) => {
-  // First get the product to delete the image file
-  db.get('SELECT image_path FROM products WHERE id = ?', [req.params.id], (err, row) => {
+// Get all progress posts (admin only)
+app.get('/api/admin/progress', isAdmin, (req, res) => {
+  db.all(`
+    SELECT p.*, u.full_name, u.email
+    FROM progress_posts p
+    JOIN users u ON p.user_id = u.id
+    ORDER BY p.created_at DESC
+  `, [], (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(rows);
+  });
+});
+
+// ==================== MEMBER ROUTES ====================
+
+// Member registration
+app.post('/api/members/register', async (req, res) => {
+  const { full_name, email, password, phone, profession } = req.body;
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  db.run(
+    'INSERT INTO users (full_name, email, password, phone, profession, status) VALUES (?, ?, ?, ?, ?, ?)',
+    [full_name, email, hashedPassword, phone, profession, 'active'],
+    function(err) {
+      if (err) {
+        if (err.message.includes('UNIQUE')) {
+          res.status(400).json({ error: 'Email already exists' });
+        } else {
+          res.status(500).json({ error: err.message });
+        }
+        return;
+      }
+      res.json({ success: true, userId: this.lastID });
+    }
+  );
+});
+
+// Member login
+app.post('/api/members/login', (req, res) => {
+  const { email, password } = req.body;
+
+  db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
 
-    if (row) {
-      // Delete the image file
-      const imagePath = path.join(__dirname, 'public', row.image_path);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
+    if (!user) {
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
     }
 
-    // Delete the product from database
-    db.run('DELETE FROM products WHERE id = ?', [req.params.id], (err) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
+    const validPassword = await bcrypt.compare(password, user.password);
+
+    if (!validPassword) {
+      res.status(401).json({ error: 'Invalid credentials' });
+      return;
+    }
+
+    // Update last login
+    db.run('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
+
+    req.session.userId = user.id;
+    req.session.userName = user.full_name;
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        full_name: user.full_name,
+        email: user.email,
+        profession: user.profession
       }
-      res.json({ success: true, message: 'Product deleted successfully' });
     });
   });
 });
 
-// Like/Unlike product
-app.post('/api/products/:id/like', (req, res) => {
-  const productId = req.params.id;
-  const clientIp = getClientIp(req);
+// Member logout
+app.post('/api/members/logout', (req, res) => {
+  req.session.destroy();
+  res.json({ success: true });
+});
 
-  // Check if already liked
+// Check member status
+app.get('/api/members/status', (req, res) => {
+  if (req.session.userId) {
+    db.get('SELECT id, full_name, email, profession, profile_image FROM users WHERE id = ?',
+      [req.session.userId],
+      (err, user) => {
+        if (err || !user) {
+          res.json({ isLoggedIn: false });
+          return;
+        }
+        res.json({ isLoggedIn: true, user });
+      }
+    );
+  } else {
+    res.json({ isLoggedIn: false });
+  }
+});
+
+// ==================== GOALS ROUTES ====================
+
+// Create goal
+app.post('/api/goals', isMember, (req, res) => {
+  const { week_number, what_to_do, how_to_do, currently_working_on, target_date } = req.body;
+
+  db.run(
+    'INSERT INTO goals (user_id, week_number, what_to_do, how_to_do, currently_working_on, target_date) VALUES (?, ?, ?, ?, ?, ?)',
+    [req.session.userId, week_number, what_to_do, how_to_do, currently_working_on, target_date],
+    function(err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json({ success: true, goalId: this.lastID });
+    }
+  );
+});
+
+// Get my goals
+app.get('/api/goals', isMember, (req, res) => {
+  db.all(
+    'SELECT * FROM goals WHERE user_id = ? ORDER BY created_at DESC',
+    [req.session.userId],
+    (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json(rows);
+    }
+  );
+});
+
+// Update goal
+app.put('/api/goals/:id', isMember, (req, res) => {
+  const { what_to_do, how_to_do, currently_working_on, status } = req.body;
+
+  db.run(
+    'UPDATE goals SET what_to_do = ?, how_to_do = ?, currently_working_on = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?',
+    [what_to_do, how_to_do, currently_working_on, status, req.params.id, req.session.userId],
+    (err) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json({ success: true });
+    }
+  );
+});
+
+// ==================== PROGRESS POSTS ROUTES ====================
+
+// Create progress post
+app.post('/api/progress', isMember, upload.single('image'), (req, res) => {
+  const { content } = req.body;
+  const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+  db.run(
+    'INSERT INTO progress_posts (user_id, content, image_path) VALUES (?, ?, ?)',
+    [req.session.userId, content, imagePath],
+    function(err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json({ success: true, postId: this.lastID });
+    }
+  );
+});
+
+// Get all progress posts (member feed)
+app.get('/api/progress', isMember, (req, res) => {
+  db.all(`
+    SELECT
+      p.*,
+      u.full_name,
+      u.profile_image,
+      CASE WHEN pl.user_id IS NOT NULL THEN 1 ELSE 0 END as user_voted
+    FROM progress_posts p
+    JOIN users u ON p.user_id = u.id
+    LEFT JOIN progress_likes pl ON p.id = pl.post_id AND pl.user_id = ?
+    ORDER BY p.created_at DESC
+  `, [req.session.userId], (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(rows);
+  });
+});
+
+// Vote on progress post (Value Added)
+app.post('/api/progress/:id/vote', isMember, (req, res) => {
+  const postId = req.params.id;
+  const userId = req.session.userId;
+
+  // Check if already voted
   db.get(
-    'SELECT id FROM likes WHERE product_id = ? AND ip_address = ?',
-    [productId, clientIp],
+    'SELECT id FROM progress_likes WHERE post_id = ? AND user_id = ?',
+    [postId, userId],
     (err, row) => {
       if (err) {
         res.status(500).json({ error: err.message });
@@ -220,45 +417,119 @@ app.post('/api/products/:id/like', (req, res) => {
       }
 
       if (row) {
-        // Unlike: remove like and decrement count
-        db.run('DELETE FROM likes WHERE product_id = ? AND ip_address = ?', [productId, clientIp], (err) => {
-          if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-          }
-
-          db.run('UPDATE products SET likes_count = likes_count - 1 WHERE id = ?', [productId], (err) => {
+        // Remove vote
+        db.run('DELETE FROM progress_likes WHERE post_id = ? AND user_id = ?',
+          [postId, userId],
+          (err) => {
             if (err) {
               res.status(500).json({ error: err.message });
               return;
             }
-            res.json({ success: true, action: 'unliked' });
-          });
-        });
+
+            db.run('UPDATE progress_posts SET value_added_count = value_added_count - 1 WHERE id = ?',
+              [postId],
+              (err) => {
+                if (err) {
+                  res.status(500).json({ error: err.message });
+                  return;
+                }
+                res.json({ success: true, action: 'unvoted' });
+              }
+            );
+          }
+        );
       } else {
-        // Like: add like and increment count
-        db.run('INSERT INTO likes (product_id, ip_address) VALUES (?, ?)', [productId, clientIp], (err) => {
-          if (err) {
-            res.status(500).json({ error: err.message });
-            return;
-          }
-
-          db.run('UPDATE products SET likes_count = likes_count + 1 WHERE id = ?', [productId], (err) => {
+        // Add vote
+        db.run('INSERT INTO progress_likes (post_id, user_id) VALUES (?, ?)',
+          [postId, userId],
+          (err) => {
             if (err) {
               res.status(500).json({ error: err.message });
               return;
             }
-            res.json({ success: true, action: 'liked' });
-          });
-        });
+
+            db.run('UPDATE progress_posts SET value_added_count = value_added_count + 1 WHERE id = ?',
+              [postId],
+              (err) => {
+                if (err) {
+                  res.status(500).json({ error: err.message });
+                  return;
+                }
+                res.json({ success: true, action: 'voted' });
+              }
+            );
+          }
+        );
       }
     }
   );
 });
 
-// Get WhatsApp number
-app.get('/api/whatsapp', (req, res) => {
-  res.json({ number: process.env.WHATSAPP_NUMBER || '' });
+// ==================== APPLICATION ROUTES ====================
+
+// Submit application
+app.post('/api/applications', (req, res) => {
+  const { full_name, email, phone, profession, why_join, goals } = req.body;
+
+  db.run(
+    'INSERT INTO applications (full_name, email, phone, profession, why_join, goals) VALUES (?, ?, ?, ?, ?, ?)',
+    [full_name, email, phone, profession, why_join, goals],
+    function(err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json({ success: true, applicationId: this.lastID });
+    }
+  );
+});
+
+// ==================== TESTIMONIALS ROUTES ====================
+
+// Get all testimonials
+app.get('/api/testimonials', (req, res) => {
+  db.all('SELECT * FROM testimonials WHERE featured = 1 ORDER BY created_at DESC', [], (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(rows);
+  });
+});
+
+// Add testimonial (admin only)
+app.post('/api/admin/testimonials', isAdmin, upload.single('image'), (req, res) => {
+  const { name, role, content, rating } = req.body;
+  const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+  db.run(
+    'INSERT INTO testimonials (name, role, content, image_path, rating, featured) VALUES (?, ?, ?, ?, ?, ?)',
+    [name, role, content, imagePath, rating || 5, 1],
+    function(err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json({ success: true, testimonialId: this.lastID });
+    }
+  );
+});
+
+// ==================== MENTOR REPORTS ROUTES ====================
+
+// Get my reports
+app.get('/api/reports', isMember, (req, res) => {
+  db.all(
+    'SELECT * FROM mentor_reports WHERE user_id = ? ORDER BY created_at DESC',
+    [req.session.userId],
+    (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json(rows);
+    }
+  );
 });
 
 // Error handler
@@ -269,5 +540,5 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Mentorship Platform Server running on http://localhost:${PORT}`);
 });

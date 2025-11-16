@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel - Shop Manager</title>
+  <title>Mentor Dashboard - Egbodofo Joshua</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Login Screen -->
   <div id="login-container" class="login-container">
     <div class="login-box">
-      <h1>Admin Login</h1>
+      <h1 style="color: var(--primary-blue);">Mentor Login</h1>
+      <p style="text-align: center; color: var(--text-light); margin-bottom: 2rem;">Egbodofo Joshua - Admin Panel</p>
       <form id="login-form">
         <div class="form-group">
           <label for="username">Username</label>
@@ -19,66 +21,439 @@
           <label for="password">Password</label>
           <input type="password" id="password" name="password" required>
         </div>
-        <button type="submit" class="btn btn-primary">Login</button>
-        <div id="login-error" class="error-message"></div>
+        <button type="submit" class="btn-submit">Login</button>
+        <div id="login-error" class="message error" style="display: none;"></div>
       </form>
     </div>
   </div>
 
-  <div id="admin-container" class="admin-container" style="display: none;">
-    <header class="admin-header">
-      <h1>Shop Admin Panel</h1>
-      <button id="logout-btn" class="btn btn-secondary">Logout</button>
-    </header>
-
-    <div class="admin-content">
-      <div class="upload-section">
-        <h2>Upload New Product</h2>
-        <form id="upload-form" enctype="multipart/form-data">
-          <div class="form-group">
-            <label for="title">Product Title *</label>
-            <input type="text" id="title" name="title" required placeholder="e.g., Nike Air Jordan 1">
-          </div>
-
-          <div class="form-group">
-            <label for="category">Category *</label>
-            <select id="category" name="category" required>
-              <option value="">Select Category</option>
-              <option value="shoes">Shoes</option>
-              <option value="bags">Bags</option>
-              <option value="accessories">Accessories</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="price">Price *</label>
-            <input type="number" id="price" name="price" step="0.01" required placeholder="0.00">
-          </div>
-
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description" rows="4" placeholder="Product description..."></textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="image">Product Image *</label>
-            <input type="file" id="image" name="image" accept="image/*" required>
-            <div id="image-preview" class="image-preview"></div>
-          </div>
-
-          <button type="submit" class="btn btn-primary">Upload Product</button>
-          <div id="upload-message" class="message"></div>
-        </form>
+  <!-- Admin Dashboard -->
+  <div id="admin-container" class="dashboard" style="display: none;">
+    <div class="dashboard-container">
+      <!-- Header -->
+      <div class="dashboard-header">
+        <div>
+          <h1>Mentor Dashboard</h1>
+          <p style="opacity: 0.9;">Welcome, Egbodofo Joshua</p>
+        </div>
+        <button id="logout-btn" style="background: rgba(255,255,255,0.2); color: var(--white); border: 2px solid var(--white); padding: 0.75rem 1.5rem; border-radius: 10px; cursor: pointer; font-weight: 600;">Logout</button>
       </div>
 
-      <div class="products-section">
-        <h2>Manage Products</h2>
-        <div id="admin-products-grid" class="products-grid"></div>
+      <!-- Main Layout -->
+      <div class="dashboard-grid">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <ul class="sidebar-nav">
+            <li><a href="#" class="active" onclick="showSection('applications')">📋 Applications</a></li>
+            <li><a href="#" onclick="showSection('members')">👥 Members</a></li>
+            <li><a href="#" onclick="showSection('goals')">🎯 All Goals</a></li>
+            <li><a href="#" onclick="showSection('progress')">📊 Progress Feed</a></li>
+            <li><a href="#" onclick="showSection('reports')">✍️ Write Reports</a></li>
+            <li><a href="#" onclick="showSection('testimonials')">⭐ Testimonials</a></li>
+          </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+          <!-- Applications Section -->
+          <div id="applications-section" class="content-section">
+            <h2 style="margin-bottom: 1.5rem;">Program Applications</h2>
+            <div id="applications-list">
+              <div class="loading">Loading applications...</div>
+            </div>
+          </div>
+
+          <!-- Members Section -->
+          <div id="members-section" class="content-section" style="display: none;">
+            <h2 style="margin-bottom: 1.5rem;">Program Members</h2>
+            <div id="members-list">
+              <div class="loading">Loading members...</div>
+            </div>
+          </div>
+
+          <!-- Goals Section -->
+          <div id="goals-section" class="content-section" style="display: none;">
+            <h2 style="margin-bottom: 1.5rem;">All Member Goals</h2>
+            <div id="goals-list">
+              <div class="loading">Loading goals...</div>
+            </div>
+          </div>
+
+          <!-- Progress Section -->
+          <div id="progress-section" class="content-section" style="display: none;">
+            <h2 style="margin-bottom: 1.5rem;">Member Progress Feed</h2>
+            <div id="progress-list">
+              <div class="loading">Loading progress...</div>
+            </div>
+          </div>
+
+          <!-- Reports Section -->
+          <div id="reports-section" class="content-section" style="display: none;">
+            <h2 style="margin-bottom: 1.5rem;">Write Mentor Report</h2>
+            <div style="background: var(--bg-light); padding: 2rem; border-radius: 15px;">
+              <form id="report-form">
+                <div class="form-group">
+                  <label for="report_user">Select Member</label>
+                  <select id="report_user" required>
+                    <option value="">Choose a member...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="report_type">Report Type</label>
+                  <select id="report_type" required>
+                    <option value="weekly">Weekly Report</option>
+                    <option value="monthly">Monthly Report</option>
+                    <option value="special">Special Feedback</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="report_content">Report Content</label>
+                  <textarea id="report_content" required style="min-height: 200px;" placeholder="Write personalized feedback, strategic guidance, and encouragement for the mentee..."></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Send Report</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Testimonials Section -->
+          <div id="testimonials-section" class="content-section" style="display: none;">
+            <h2 style="margin-bottom: 1.5rem;">Add Testimonial</h2>
+            <div style="background: var(--bg-light); padding: 2rem; border-radius: 15px;">
+              <form id="testimonial-form" enctype="multipart/form-data">
+                <div class="form-group">
+                  <label for="testimonial_name">Name</label>
+                  <input type="text" id="testimonial_name" required>
+                </div>
+                <div class="form-group">
+                  <label for="testimonial_role">Role/Title</label>
+                  <input type="text" id="testimonial_role" placeholder="e.g., Entrepreneur, CEO">
+                </div>
+                <div class="form-group">
+                  <label for="testimonial_content">Testimonial</label>
+                  <textarea id="testimonial_content" required style="min-height: 150px;"></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="testimonial_image">Photo (optional)</label>
+                  <input type="file" id="testimonial_image" accept="image/*">
+                </div>
+                <div class="form-group">
+                  <label for="testimonial_rating">Rating</label>
+                  <select id="testimonial_rating">
+                    <option value="5">5 Stars</option>
+                    <option value="4">4 Stars</option>
+                    <option value="3">3 Stars</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn-submit">Add Testimonial</button>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <script src="admin.js"></script>
+  <script>
+    // Login
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (response.ok) {
+          document.getElementById('login-container').style.display = 'none';
+          document.getElementById('admin-container').style.display = 'block';
+          loadApplications();
+          loadMembersForReports();
+        } else {
+          const error = document.getElementById('login-error');
+          error.textContent = 'Invalid credentials';
+          error.style.display = 'block';
+        }
+      } catch (error) {
+        alert('Login error');
+      }
+    });
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', async function() {
+      await fetch('/api/admin/logout', { method: 'POST' });
+      location.reload();
+    });
+
+    // Show section
+    function showSection(section) {
+      document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+      document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+
+      document.getElementById(`${section}-section`).style.display = 'block';
+      event.target.classList.add('active');
+
+      if (section === 'applications') loadApplications();
+      if (section === 'members') loadMembers();
+      if (section === 'goals') loadAllGoals();
+      if (section === 'progress') loadAllProgress();
+    }
+
+    // Load applications
+    async function loadApplications() {
+      try {
+        const response = await fetch('/api/admin/applications');
+        const applications = await response.json();
+
+        const container = document.getElementById('applications-list');
+
+        if (applications.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No applications yet.</p>';
+          return;
+        }
+
+        container.innerHTML = applications.map(app => `
+          <div style="background: var(--white); border: 2px solid ${app.status === 'pending' ? 'var(--accent-gold)' : 'var(--border-light)'}; border-radius: 15px; padding: 2rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
+              <div>
+                <h3 style="color: var(--primary-blue); margin-bottom: 0.5rem;">${app.full_name}</h3>
+                <p style="color: var(--text-light);">${app.email} • ${app.profession || 'Not specified'}</p>
+              </div>
+              <span style="background: ${app.status === 'pending' ? 'var(--accent-gold)' : '#10B981'}; color: var(--white); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">${app.status}</span>
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <h4 style="color: var(--primary-blue); margin-bottom: 0.5rem;">Why join:</h4>
+              <p style="color: var(--text-dark);">${app.why_join}</p>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+              <h4 style="color: var(--primary-blue); margin-bottom: 0.5rem;">Goals:</h4>
+              <p style="color: var(--text-dark);">${app.goals}</p>
+            </div>
+            ${app.status === 'pending' ? `
+              <div style="display: flex; gap: 1rem;">
+                <button onclick="approveApplication(${app.id})" class="btn-primary" style="flex: 1;">Approve & Create Account</button>
+                <button onclick="rejectApplication(${app.id})" class="btn-secondary" style="flex: 1; background: #EF4444;">Reject</button>
+              </div>
+            ` : `
+              <p style="color: var(--text-light); font-style: italic;">Reviewed on ${new Date(app.reviewed_at).toLocaleDateString()}</p>
+            `}
+          </div>
+        `).join('');
+      } catch (error) {
+        document.getElementById('applications-list').innerHTML = '<p style="color: var(--text-light);">Error loading applications</p>';
+      }
+    }
+
+    // Approve application
+    async function approveApplication(id) {
+      const password = prompt('Enter initial password for the new member:');
+      if (!password) return;
+
+      try {
+        const response = await fetch(`/api/admin/applications/${id}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+
+        if (response.ok) {
+          alert('Application approved and user account created!');
+          loadApplications();
+        } else {
+          alert('Error approving application');
+        }
+      } catch (error) {
+        alert('Error approving application');
+      }
+    }
+
+    // Load members
+    async function loadMembers() {
+      try {
+        const response = await fetch('/api/admin/users');
+        const members = await response.json();
+
+        const container = document.getElementById('members-list');
+
+        if (members.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No members yet.</p>';
+          return;
+        }
+
+        container.innerHTML = members.map(member => {
+          const initials = member.full_name.split(' ').map(n => n[0]).join('');
+          return `
+            <div style="background: var(--white); border: 2px solid var(--border-light); border-radius: 15px; padding: 2rem; margin-bottom: 1.5rem; display: flex; gap: 2rem; align-items: start;">
+              <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--bg-gradient); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; font-weight: 700; flex-shrink: 0;">
+                ${initials}
+              </div>
+              <div style="flex: 1;">
+                <h3 style="color: var(--primary-blue); margin-bottom: 0.5rem;">${member.full_name}</h3>
+                <p style="color: var(--text-light); margin-bottom: 1rem;">${member.email}</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                  <div>
+                    <p style="color: var(--text-light); font-size: 0.85rem;">Profession</p>
+                    <p style="color: var(--text-dark); font-weight: 600;">${member.profession || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <p style="color: var(--text-light); font-size: 0.85rem;">Status</p>
+                    <p style="color: var(--text-dark); font-weight: 600;">${member.status}</p>
+                  </div>
+                  <div>
+                    <p style="color: var(--text-light); font-size: 0.85rem;">Joined</p>
+                    <p style="color: var(--text-dark); font-weight: 600;">${new Date(member.joined_date).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        document.getElementById('members-list').innerHTML = '<p style="color: var(--text-light);">Error loading members</p>';
+      }
+    }
+
+    // Load all goals
+    async function loadAllGoals() {
+      try {
+        const usersResponse = await fetch('/api/admin/users');
+        const users = await usersResponse.json();
+
+        let allGoalsHTML = '';
+
+        for (const user of users) {
+          const goalsResponse = await fetch(`/api/admin/users/${user.id}/goals`);
+          const goals = await goalsResponse.json();
+
+          if (goals.length > 0) {
+            allGoalsHTML += `
+              <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem;">
+                <h3 style="color: var(--primary-blue); margin-bottom: 1.5rem;">${user.full_name}</h3>
+                ${goals.map(goal => `
+                  <div style="background: var(--white); border: 2px solid var(--border-light); border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                      <span style="background: var(--accent-gold); color: var(--primary-blue); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Week ${goal.week_number}</span>
+                      <span style="color: var(--text-light);">${new Date(goal.target_date).toLocaleDateString()}</span>
+                    </div>
+                    <p style="color: var(--text-dark); margin-bottom: 0.5rem;"><strong>What:</strong> ${goal.what_to_do}</p>
+                    <p style="color: var(--text-dark);"><strong>How:</strong> ${goal.how_to_do}</p>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          }
+        }
+
+        document.getElementById('goals-list').innerHTML = allGoalsHTML || '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No goals yet.</p>';
+      } catch (error) {
+        document.getElementById('goals-list').innerHTML = '<p style="color: var(--text-light);">Error loading goals</p>';
+      }
+    }
+
+    // Load all progress
+    async function loadAllProgress() {
+      try {
+        const response = await fetch('/api/admin/progress');
+        const posts = await response.json();
+
+        const container = document.getElementById('progress-list');
+
+        if (posts.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 2rem;">No progress posts yet.</p>';
+          return;
+        }
+
+        container.innerHTML = posts.map(post => `
+          <div style="background: var(--white); border: 2px solid var(--border-light); border-radius: 15px; padding: 1.5rem; margin-bottom: 1.5rem;">
+            <h4 style="color: var(--primary-blue); margin-bottom: 0.5rem;">${post.full_name}</h4>
+            <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1rem;">${new Date(post.created_at).toLocaleString()}</p>
+            <p style="color: var(--text-dark); margin-bottom: 1rem;">${post.content}</p>
+            ${post.image_path ? `<img src="${post.image_path}" style="width: 100%; border-radius: 10px; margin-bottom: 1rem;">` : ''}
+            <p style="color: var(--text-light); font-size: 0.9rem;">⭐ ${post.value_added_count} Value Added votes</p>
+          </div>
+        `).join('');
+      } catch (error) {
+        document.getElementById('progress-list').innerHTML = '<p style="color: var(--text-light);">Error loading progress</p>';
+      }
+    }
+
+    // Load members for reports dropdown
+    async function loadMembersForReports() {
+      try {
+        const response = await fetch('/api/admin/users');
+        const members = await response.json();
+
+        const select = document.getElementById('report_user');
+        select.innerHTML = '<option value="">Choose a member...</option>' +
+          members.map(m => `<option value="${m.id}">${m.full_name}</option>`).join('');
+      } catch (error) {
+        console.error('Error loading members');
+      }
+    }
+
+    // Submit report
+    document.getElementById('report-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = {
+        user_id: document.getElementById('report_user').value,
+        report_type: document.getElementById('report_type').value,
+        report_content: document.getElementById('report_content').value
+      };
+
+      try {
+        const response = await fetch('/api/admin/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          alert('Report sent successfully!');
+          this.reset();
+        } else {
+          alert('Error sending report');
+        }
+      } catch (error) {
+        alert('Error sending report');
+      }
+    });
+
+    // Submit testimonial
+    document.getElementById('testimonial-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append('name', document.getElementById('testimonial_name').value);
+      formData.append('role', document.getElementById('testimonial_role').value);
+      formData.append('content', document.getElementById('testimonial_content').value);
+      formData.append('rating', document.getElementById('testimonial_rating').value);
+
+      const imageFile = document.getElementById('testimonial_image').files[0];
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      try {
+        const response = await fetch('/api/admin/testimonials', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          alert('Testimonial added successfully!');
+          this.reset();
+        } else {
+          alert('Error adding testimonial');
+        }
+      } catch (error) {
+        alert('Error adding testimonial');
+      }
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apply - World Changers Mentorship Program</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="main-nav">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        World <span class="logo-accent">Changers</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="curriculum.html">Curriculum</a></li>
+        <li><a href="testimonials.html">Testimonials</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="apply.html" class="cta-btn active">Apply Now</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" style="padding: 4rem 2rem;">
+    <div class="container" style="text-align: center; max-width: 800px;">
+      <h1 style="color: var(--white); margin-bottom: 1.5rem;">Apply to World Changers</h1>
+      <p class="hero-subtitle">
+        Begin your journey from passive aspiration to world-changing impact. All applications are personally reviewed by Egbodofo Joshua.
+      </p>
+    </div>
+  </section>
+
+  <!-- Application Form -->
+  <section class="section">
+    <div class="container">
+      <div class="form-container">
+        <div id="message-container"></div>
+        <form id="application-form">
+          <div class="form-group">
+            <label for="full_name">Full Name *</label>
+            <input type="text" id="full_name" name="full_name" required placeholder="Enter your full name">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="email" required placeholder="your@email.com">
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="+234 XXX XXX XXXX">
+          </div>
+
+          <div class="form-group">
+            <label for="profession">Current Profession/Role *</label>
+            <input type="text" id="profession" name="profession" required placeholder="e.g., Entrepreneur, Business Leader, Student">
+          </div>
+
+          <div class="form-group">
+            <label for="why_join">Why do you want to join World Changers? *</label>
+            <textarea id="why_join" name="why_join" required placeholder="Tell us about your motivation for joining this program. What impact do you want to make?"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="goals">What are your primary goals for the next 3 months? *</label>
+            <textarea id="goals" name="goals" required placeholder="Share your specific goals and what you hope to achieve through this mentorship program."></textarea>
+          </div>
+
+          <div style="background: var(--bg-light); padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem;">
+            <h4 style="color: var(--primary-blue); margin-bottom: 1rem;">What Happens Next?</h4>
+            <ul style="color: var(--text-dark); line-height: 2;">
+              <li>✓ Your application is reviewed personally by Egbodofo Joshua</li>
+              <li>✓ You'll receive a response within 3-5 business days</li>
+              <li>✓ If approved, you'll receive login credentials and onboarding details</li>
+              <li>✓ Your mentorship journey begins immediately upon approval</li>
+            </ul>
+          </div>
+
+          <button type="submit" class="btn-submit" id="submit-btn">Submit Application</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>World Changers</h3>
+        <p>Transforming intentional individuals into global impact strategists through ethical leadership and strategic execution.</p>
+      </div>
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <p><a href="index.html">Home</a></p>
+        <p><a href="about.html">About</a></p>
+        <p><a href="curriculum.html">Curriculum</a></p>
+        <p><a href="testimonials.html">Testimonials</a></p>
+        <p><a href="apply.html">Apply</a></p>
+      </div>
+      <div class="footer-section">
+        <h3>Member Area</h3>
+        <p><a href="login.html">Member Login</a></p>
+        <p><a href="dashboard.html">Dashboard</a></p>
+        <p><a href="admin.html">Mentor Login</a></p>
+      </div>
+      <div class="footer-section">
+        <h3>Contact</h3>
+        <p><a href="contact.html">Get in Touch</a></p>
+        <p>Email: contact@worldchangers.com</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 World Changers Mentorship Program. Founded by Egbodofo Joshua. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('application-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('submit-btn');
+      const messageContainer = document.getElementById('message-container');
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      const formData = {
+        full_name: document.getElementById('full_name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        profession: document.getElementById('profession').value,
+        why_join: document.getElementById('why_join').value,
+        goals: document.getElementById('goals').value
+      };
+
+      try {
+        const response = await fetch('/api/applications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          messageContainer.innerHTML = `
+            <div class="message success">
+              <h3 style="margin-bottom: 0.5rem;">Application Submitted Successfully!</h3>
+              <p>Thank you for your interest in World Changers. Egbodofo Joshua will personally review your application and get back to you within 3-5 business days.</p>
+            </div>
+          `;
+          document.getElementById('application-form').reset();
+        } else {
+          throw new Error(data.error || 'Failed to submit application');
+        }
+      } catch (error) {
+        messageContainer.innerHTML = `
+          <div class="message error">
+            <strong>Error:</strong> ${error.message}
+          </div>
+        `;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Application';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  </script>
+</body>
+</html>

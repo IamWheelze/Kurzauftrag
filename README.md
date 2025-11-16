@@ -1,18 +1,62 @@
-# Instagram-Style Shop Platform
+# World Changers Mentorship Platform
 
-A modern e-commerce platform for showcasing and selling products (shoes, bags, and accessories) with Instagram-like features.
+A comprehensive mentorship and LMS platform for Egbodofo Joshua's "World Changers" program. This platform combines high-converting marketing pages with interactive learning management features to support intentional individuals in transforming their vision into world-changing impact.
+
+## Project Overview
+
+**Program Name:** World Changers
+**Mentor:** Egbodofo Joshua - Global Impact Strategist & Founder
+**Duration:** 3 months initial commitment / 2-year growth journey
+**Focus:** Ethical leadership, strategic results, and transformative business development
 
 ## Features
 
-- **Admin Panel**: Secure admin interface for uploading products
-- **Product Management**: Upload images with title, description, category, and price
-- **Like System**: Customers can like products (tracked by IP address)
-- **WhatsApp Integration**: Direct purchase inquiries via WhatsApp
-- **Category Filtering**: Filter products by category (shoes, bags, accessories)
-- **Responsive Design**: Works beautifully on mobile and desktop
-- **Real-time Updates**: Products appear immediately after upload
+### Marketing Website
 
-## Setup Instructions
+- **Professional Deep Blue Luxury Theme** - Navy blue primary color with metallic gold/silver accents
+- **High-Converting Landing Pages:**
+  - Home page with hero section and value proposition
+  - About page featuring Egbodofo Joshua's credentials and expertise
+  - Curriculum page detailing the 4-week deep dive program
+  - Testimonials page for social proof
+  - Application page with comprehensive form
+  - Contact page
+
+### LMS Platform (Member Area)
+
+1. **Goal-Setting & Accountability Hub**
+   - Weekly goal creation and tracking
+   - Three-part goal framework: What, How, Currently Working On
+   - Target date tracking
+   - Automated email reminders (configured via environment variables)
+
+2. **Progress Feed (Social Stream)**
+   - Instagram-style progress sharing
+   - Image upload support
+   - "Value Added" voting system for peer recognition
+   - Real-time feed of member achievements
+
+3. **Mentor Reporting System**
+   - Weekly personalized feedback from Egbodofo Joshua
+   - Progress monitoring and strategic guidance
+   - Private communication channel
+
+4. **Member Dashboard**
+   - Personal progress tracking
+   - Goal management interface
+   - Community interaction
+   - Report access
+
+### Mentor Admin Dashboard
+
+- **Application Management:** Review and approve/reject applicants
+- **Member Management:** View all program members and their stats
+- **Goal Oversight:** Monitor all member goals across the program
+- **Progress Monitoring:** Access all member progress posts and engagement
+- **Reporting Tools:** Write personalized mentor reports
+- **Content Management:** Add testimonials and manage social proof
+
+## Installation & Setup
 
 ### 1. Install Dependencies
 
@@ -22,177 +66,219 @@ npm install
 
 ### 2. Configure Environment Variables
 
-Copy the example environment file and edit it with your settings:
+Copy the example environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` file:
+Edit `.env` file with your settings:
 
 ```env
-# Admin credentials (change these!)
+# Mentor/Admin credentials (Egbodofo Joshua)
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=your_secure_password
+ADMIN_PASSWORD=your_secure_password_here
 
-# WhatsApp number (include country code, no + or spaces)
-# Example: For +1 234 567 8900, use: 12345678900
-WHATSAPP_NUMBER=12345678900
-
-# Session secret (use a random string)
+# Session secret (use a strong random string)
 SESSION_SECRET=your-random-secret-key-here
 
 # Server port
 PORT=3000
+
+# Email configuration (optional - for automated reminders)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+EMAIL_FROM=Egbodofo Joshua <noreply@worldchangers.com>
 ```
 
-### 3. Start the Server
+### 3. Add Mentor Profile Image
+
+Place Egbodofo Joshua's profile image (`application picture.jpg`) in the uploads directory:
 
 ```bash
-npm start
+# Create uploads directory if it doesn't exist
+mkdir -p uploads
+
+# Copy your profile image (rename to mentor-profile.jpg)
+cp /path/to/application_picture.jpg uploads/mentor-profile.jpg
 ```
 
-Or for development with auto-reload:
+### 4. Start the Server
+
+Development mode (with auto-reload):
 
 ```bash
 npm run dev
 ```
 
-### 4. Access the Platform
+Production mode:
 
-- **Public Shop**: http://localhost:3000
-- **Admin Panel**: http://localhost:3000/admin.html
+```bash
+npm start
+```
 
-## Usage
+### 5. Access the Platform
 
-### Admin Operations
+- **Public Website:** http://localhost:3000
+- **Member Login:** http://localhost:3000/login.html
+- **Member Dashboard:** http://localhost:3000/dashboard.html
+- **Mentor Admin Panel:** http://localhost:3000/admin.html
 
-1. Navigate to http://localhost:3000/admin.html
-2. Login with your admin credentials (from .env file)
-3. Upload products with:
-   - Product title
-   - Category (shoes, bags, accessories, other)
-   - Price
-   - Description (optional)
-   - Product image
-4. Manage existing products (view, delete)
+## Core Curriculum
 
-### Customer Experience
+The World Changers program features a transformative 4-week curriculum:
 
-1. Browse products at http://localhost:3000
-2. Filter by category
-3. Like favorite products
-4. Click "Buy on WhatsApp" to contact you directly on WhatsApp with pre-filled message
+1. **Week 1: Hope vs. Faith** - Understanding conviction needed for real change
+2. **Week 2: Wishes vs. Desires** - Differentiating passive longing from committed action
+3. **Week 3: Why People Don't Have Desires** - Removing barriers to ambition
+4. **Week 4: Cultivating Desires** - Practical strategies for sustaining massive goals
+
+## Technology Stack
+
+- **Backend:** Node.js + Express
+- **Database:** SQLite with comprehensive schema
+- **Frontend:** Vanilla JavaScript, HTML5, CSS3
+- **File Upload:** Multer for image handling
+- **Authentication:** Express Session + bcryptjs
+- **Styling:** Custom CSS with CSS variables for theming
+
+## Database Schema
+
+Main tables:
+
+- **users** - Member accounts and profiles
+- **applications** - Program application submissions
+- **goals** - Weekly goal tracking
+- **progress_posts** - Member progress updates
+- **progress_likes** - Value Added voting
+- **mentor_reports** - Personalized feedback from mentor
+- **testimonials** - Social proof and success stories
+- **email_reminders** - Automated notification log
 
 ## File Structure
 
 ```
 .
-├── server.js           # Express server and API routes
-├── database.js         # SQLite database setup
-├── package.json        # Dependencies
-├── .env               # Configuration (create from .env.example)
-├── public/            # Frontend files
-│   ├── index.html     # Public shop page
-│   ├── admin.html     # Admin panel
-│   ├── styles.css     # Styling
-│   ├── app.js        # Public shop JavaScript
-│   └── admin.js      # Admin panel JavaScript
-└── uploads/          # Product images (auto-created)
+├── server.js              # Express server and API routes
+├── database.js            # SQLite database configuration
+├── package.json           # Dependencies and scripts
+├── .env                   # Configuration (create from .env.example)
+├── .env.example           # Example environment configuration
+├── public/                # Frontend files
+│   ├── index.html         # Home page
+│   ├── about.html         # About Egbodofo Joshua
+│   ├── curriculum.html    # 4-week curriculum
+│   ├── testimonials.html  # Success stories
+│   ├── apply.html         # Application form
+│   ├── contact.html       # Contact page
+│   ├── login.html         # Member login
+│   ├── dashboard.html     # Member dashboard (LMS)
+│   ├── admin.html         # Mentor admin panel
+│   └── styles.css         # Luxury theme styling
+└── uploads/               # User-uploaded files (auto-created)
 ```
 
-## Technology Stack
+## Usage Guide
 
-- **Backend**: Node.js + Express
-- **Database**: SQLite
-- **Frontend**: Vanilla JavaScript, HTML, CSS
-- **File Upload**: Multer
-- **Authentication**: Express Session + bcryptjs
+### For Egbodofo Joshua (Mentor/Admin):
+
+1. Login at `/admin.html` with admin credentials
+2. Review applications in the Applications tab
+3. Approve worthy applicants and set their initial password
+4. Monitor member progress through Goals and Progress tabs
+5. Write personalized weekly reports in the Reports section
+6. Add testimonials to build social proof
+
+### For Program Members:
+
+1. Apply through the website application form
+2. Wait for approval from Egbodofo Joshua
+3. Receive login credentials
+4. Login at `/login.html`
+5. Set weekly goals in the Goals section
+6. Share progress updates with the community
+7. Support peers through Value Added voting
+8. Receive and review personalized mentor reports
 
 ## Security Features
 
-- Session-based admin authentication
-- File upload validation (images only)
-- SQL injection prevention (parameterized queries)
-- IP-based like tracking
-- Secure password handling
+- Session-based authentication for members and admin
+- Password hashing with bcryptjs
+- SQL injection prevention through parameterized queries
+- File upload validation (images only, 10MB limit)
+- Secure session management
+- User-based content access control
 
-## Deployment Tips
+## Deployment
 
-### For Production:
+### Recommended Steps for Production:
 
-1. **Use HTTPS**: Set `cookie.secure: true` in session config
-2. **Strong Passwords**: Use strong admin password in .env
-3. **Environment Variables**: Never commit .env file
-4. **File Permissions**: Ensure proper permissions on uploads directory
-5. **Rate Limiting**: Consider adding rate limiting middleware
-6. **Database Backups**: Regularly backup shop.db file
+1. **Set Strong Passwords** - Change admin credentials in .env
+2. **Enable HTTPS** - Set `cookie.secure: true` in session config (server.js:58)
+3. **Environment Variables** - Never commit .env file to version control
+4. **Database Backups** - Regularly backup `mentorship.db`
+5. **Email Configuration** - Configure SMTP for automated reminders
 
-### Deploy to Cloud Platforms:
+### Deployment Platforms:
 
-**Heroku**:
+**Heroku:**
 ```bash
-# Add Procfile
 echo "web: node server.js" > Procfile
-
-# Deploy
 heroku create
 git push heroku main
 ```
 
-**DigitalOcean/VPS**:
+**DigitalOcean/VPS:**
 ```bash
-# Install PM2 for process management
 npm install -g pm2
-pm2 start server.js
+pm2 start server.js --name worldchangers
 pm2 save
+pm2 startup
 ```
 
 ## Customization
 
-### Change Colors:
+### Updating Colors
 
-Edit `public/styles.css` and modify the CSS variables:
+The deep blue luxury theme uses CSS variables in `public/styles.css`:
 
 ```css
 :root {
-  --primary-color: #405de6;
-  --accent-color: #e1306c;
-  /* ... other colors */
+  --primary-blue: #0B1A4D;      /* Deep navy/midnight blue */
+  --accent-gold: #D4AF37;        /* Metallic gold */
 }
 ```
 
-### Add More Categories:
-
-Edit `public/admin.html` and add options to the category select:
-
-```html
-<option value="new-category">New Category</option>
-```
-
-### Modify WhatsApp Message:
-
-Edit `public/app.js`, find the `whatsappMessage` variable and customize the template.
-
 ## Troubleshooting
 
-**Cannot upload images**:
-- Check that uploads/ directory exists and is writable
-- Verify file size is under 10MB
-- Ensure file is an image (jpg, png, gif, webp)
+**Cannot access admin panel:**
+- Verify .env file exists with ADMIN_USERNAME and ADMIN_PASSWORD
+- Check that the server is running
 
-**Cannot login to admin**:
-- Verify .env file exists and has correct credentials
-- Check ADMIN_USERNAME and ADMIN_PASSWORD are set
+**Database errors:**
+- Ensure write permissions on the project directory
+- Restart the server to reinitialize database
 
-**WhatsApp button not working**:
-- Verify WHATSAPP_NUMBER in .env is correct format (country code + number, no spaces or +)
-- Example: For +1-234-567-8900, use: 12345678900
+**Image uploads failing:**
+- Verify uploads/ directory exists and is writable
+- Check file size is under 10MB
+
+**Session issues:**
+- Verify SESSION_SECRET is set in .env
+- Clear browser cookies
 
 ## License
 
 ISC
 
-## Support
+## Credits
 
-For issues or questions, please open an issue on the GitHub repository.
+**Founded by:** Egbodofo Joshua
+**Program Name:** World Changers
+**Mission:** Transforming intentional individuals into global impact strategists
+
+---
+
+**© 2024 World Changers Mentorship Program. All rights reserved.**
