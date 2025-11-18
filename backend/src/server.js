@@ -26,6 +26,10 @@ const notificationRoutes = require('./routes/notifications');
 const calendarRoutes = require('./routes/calendar');
 const ratingRoutes = require('./routes/ratings');
 const feedbackRoutes = require('./routes/feedback');
+const eventRoutes = require('./routes/events');
+const messageRoutes = require('./routes/messages');
+const verificationRoutes = require('./routes/verification');
+const adminRoutes = require('./routes/admin');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -92,6 +96,10 @@ app.use('/api/notifications', authenticateToken, notificationRoutes);
 app.use('/api/calendar', authenticateToken, calendarRoutes);
 app.use('/api/ratings', authenticateToken, ratingRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/events', authenticateToken, eventRoutes);
+app.use('/api/messages', authenticateToken, messageRoutes);
+app.use('/api/verification', authenticateToken, verificationRoutes);
+app.use('/api/admin', authenticateToken, adminRoutes);
 
 // Error handling
 app.use(errorHandler);
